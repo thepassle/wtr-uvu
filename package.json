@@ -1,0 +1,24 @@
+{
+  "name": "test-f",
+  "description": "Webcomponent test-f following open-wc recommendations",
+  "license": "MIT",
+  "author": "test-f",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "web-test-runner",
+    "test:watch": "web-test-runner --watch",
+    "analyze": "cem analyze --litelement",
+    "start": "web-dev-server"
+  },
+  "dependencies": {
+    "lit": "^2.0.0"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.4.17",
+    "@open-wc/testing": "next",
+    "@web/dev-server": "^0.1.24",
+    "@web/test-runner": "^0.13.18",
+    "uvu": "^0.5.1"
+  },
+  "customElements": "custom-elements.json"
+}
