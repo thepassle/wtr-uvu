@@ -1,5 +1,19 @@
 const timer = (now = Date.now()) => () => (Date.now() - now).toFixed(2) + 'ms';
 
+/**
+ * @typedef {import('./types').Suite} Suite
+ * @typedef {import('./types').Report} Report
+ * @typedef {import('./types').TestSuiteResult} TestSuiteResult
+ * @typedef {import('./types').ExecutionOptions} ExecutionOptions
+ * @typedef {import('./types').Test} Test
+ */
+
+/**
+ * Runs the given tests in a suite, and its lifecycle hooks like before, beforeEach, after, afterEach
+ * @param {Suite} suite 
+ * @param {ExecutionOptions} options 
+ * @returns {Promise<TestSuiteResult>} testSuiteResult
+ */
 async function run(suite, {renderer}) {
   const { name, only, tests, before, after, beforeEach, afterEach } = suite;
   const testsToRun = only.length ? only : tests;
@@ -25,7 +39,7 @@ async function run(suite, {renderer}) {
       try {
         await beforeEach?.();
         
-        const { skipped } = (await test.handler()) || {};
+        const { skipped } = await test.handler() || {};
         testResult.duration = time();
         testResult.skipped = !!skipped;
 
@@ -51,8 +65,14 @@ async function run(suite, {renderer}) {
   }
 }
 
+/** @type {Suite[]} */
 const queue = [];
 
+/**
+ * Creates a suite to run tests in
+ * @param {string} name of the suite
+ * @returns {Test}
+ */
 const createSuite = (name = '') => {
   const suite = { name, tests:[], only:[] };
   
@@ -64,8 +84,8 @@ const createSuite = (name = '') => {
   test.beforeEach = handler => { suite.beforeEach = handler; };
   test.after = handler => { suite.after = handler; };
   test.afterEach = handler => { suite.afterEach = handler; };
-  test.only = handler => { suite.only.push(handler); };
-  test.skip = name => {
+  test.only = (_, handler) => { suite.only.push(handler); };
+  test.skip = (name, _) => {
     suite.tests.push({handler: () => ({skipped: true}), name});
   }
 
@@ -77,6 +97,11 @@ const createSuite = (name = '') => {
 export const suite = createSuite;
 export const test = createSuite();
 
+/**
+ * Executes any suites that have been queued up
+ * @param {ExecutionOptions} options 
+ * @returns {Promise<Report>} report
+ */
 export async function executeTests({ renderer }) {
   const time = timer();
   const results = [];
@@ -111,7 +136,6 @@ export async function executeTests({ renderer }) {
     // }
   }
 }
-
 
 const suite2 = suite('suite 2');
 suite2('hello foo', () => {
