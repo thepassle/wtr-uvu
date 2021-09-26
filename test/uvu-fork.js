@@ -53,7 +53,7 @@ async function run(suite, {renderer}) {
 
 const queue = [];
 
-export const createSuite = (name = '') => {
+const createSuite = (name = '') => {
   const suite = { name, tests:[], only:[] };
   
   const test = (name, handler) => {
@@ -79,16 +79,16 @@ export const test = createSuite();
 
 export async function executeTests({ renderer }) {
   const time = timer();
-  const suiteResults = [];
+  const results = [];
   let total = 0;
   let skipped = 0;
   let failed = 0;
 
   for(const suite of queue) {
-    const result = await run(suite, {renderer});
-    suiteResults.push(result);
+    const suiteResult = await run(suite, {renderer});
+    results.push(suiteResult);
 
-    for(const test of result.tests) {
+    for(const test of suiteResult.tests) {
       total++;
       if(test.skipped) skipped++;
       if(test.error) failed++;
@@ -102,7 +102,7 @@ export async function executeTests({ renderer }) {
     failed,
     passed: failed < 1,
     duration: time(),
-    results: suiteResults,
+    results,
 
     /** @TODO map `results` to what WTR expects */
     // testResults: {
