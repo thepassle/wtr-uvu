@@ -24,6 +24,7 @@ async function run(suite, {renderer}) {
   }
 
   try {
+    renderer?.suiteStart?.({name, only, tests});
     await before?.();
 
     for (const test of testsToRun) {
@@ -54,13 +55,14 @@ async function run(suite, {renderer}) {
         /** @TODO this will currently only work with uvu/assert, because the assert error has an `.expects` property */
         testResult.error = {...err, expected: err.expects};
       } finally {
-        renderer?.(testResult);
+        renderer?.renderTest?.(testResult);
         testSuiteResult.tests.push(testResult);
       }
     }
   } finally {
     await after?.();
 
+    renderer?.suiteEnd?.(testSuiteResult); 
     return testSuiteResult;
   }
 }
@@ -76,6 +78,7 @@ const queue = [];
 const createSuite = (name = '') => {
   const suite = { name, tests:[], only:[] };
   
+  /** @type {Test} */
   const test = (name, handler) => {
     suite.tests.push({name, handler});
   }
@@ -146,13 +149,18 @@ test('hello', () => {
   console.log('test 1');
 });
 
-executeTests({
-  renderer: (testResult) => {
+
+const renderer = {
+  suiteStart: ({name, only, tests}) => {},
+  renderTest: (testResult) => {
     const report = document.createElement('test-report');
     report.testResult = testResult;
     document.body.appendChild(report);
-  }
-}).then(r => {
+  },
+  suiteEnd: (testSuiteResult) =>{}
+}
+
+executeTests({renderer}).then(r => {
   console.log(r);
 });
 

@@ -34,7 +34,16 @@ export interface Test {
 }
 
 export interface ExecutionOptions {
-  renderer: (TestResult) => void
+  renderer: Renderer
+}
+
+export interface Renderer {
+  /** Runs before the suite starts, can be used for set up */
+  suiteStart: (args: {name: string, only: TestObject[], tests: TestObject[]}) => void,
+  /** Runs after every ran test, whether it's skipped, passed, or failed */
+  renderTest: (TestResult) => void,
+  /** Runs after the entire suite has ran */
+  suiteEnd: (TestSuiteResult) => void
 }
 
 export interface Report {
